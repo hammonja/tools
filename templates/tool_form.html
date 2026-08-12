@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == 'edit' %}Edit {{ tool.name }}{% else %}Add a tool{% endif %} · Toolbox{% endblock %}
+{% block content %}
+<div class="form-heading">
+  <a href="{{ url_for('index') }}" class="back-link">← Catalogue</a>
+  <p class="eyebrow">{% if mode == 'review' %}AI DRAFT{% elif mode == 'edit' %}CATALOGUE ENTRY{% else %}NEW CATALOGUE ENTRY{% endif %}</p>
+  <h1>{% if mode == 'review' %}Check what I found{% elif mode == 'edit' %}Edit tool{% else %}Add a tool{% endif %}</h1>
+  <p>{% if mode == 'review' %}The AI can misread labels. Correct anything below before saving.{% elif mode == 'new' %}Start with a photo, or enter the details yourself.{% endif %}</p>
+</div>
+
+{% if mode == 'new' %}
+<section class="camera-panel">
+  <div class="camera-copy">
+    <span class="camera-icon">◎</span>
+    <div><h2>Identify from a photo</h2><p>Include the whole tool and a clear view of its label or packaging.</p></div>
+  </div>
+  <form method="post" action="{{ url_for('analyse_tool') }}" enctype="multipart/form-data" id="photo-form">
+    <label class="photo-picker">
+      <input id="photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp" capture="environment" required>
+      <span>Take photo or choose image</span>
+    </label>
+    <div id="preview-wrap" class="preview-wrap" hidden><img id="preview" alt="Selected tool"><span id="file-name"></span></div>
+    <button class="button button-primary button-wide" type="submit">Analyse photograph</button>
+  </form>
+</section>
+<div class="divider"><span>or add manually</span></div>
+{% endif %}
+
+{% if tool.image_filename %}
+<div class="review-photo"><img src="{{ url_for('uploaded_file', filename=tool.image_filename) }}" alt="Uploaded tool"></div>
+{% endif %}
+
+<form class="details-form" method="post" action="{% if mode == 'review' %}{{ url_for('save_analysis') }}{% elif mode == 'edit' %}{{ url_for('edit_tool', tool_id=tool.id) }}{% else %}{{ url_for('new_tool') }}{% endif %}">
+  {% if tool.image_filename %}<input type="hidden" name="image_filename" value="{{ tool.image_filename }}">{% endif %}
+  <input type="hidden" name="confidence" value="{{ tool.confidence|default(1) }}">
+  <div class="field full"><label for="name">Tool name</label><input id="name" name="name" required value="{{ tool.name|default('') }}" placeholder="e.g. SDS Plus rotary hammer"></div>
+  <div class="field"><label for="manufacturer">Manufacturer</label><input id="manufacturer" name="manufacturer" value="{{ tool.manufacturer|default('') }}" placeholder="e.g. Titan"></div>
+  <div class="field"><label for="model">Model</label><input id="model" name="model" value="{{ tool.model|default('') }}" placeholder="e.g. TTB653SDS"></div>
+  <div class="field"><label for="category">Category</label><input id="category" name="category" required value="{{ tool.category|default('') }}" list="category-list" placeholder="e.g. Power tools"><datalist id="category-list"><option>Power tools</option><option>Hand tools</option><option>Accessories</option><option>Measuring</option><option>Garden tools</option><option>Safety equipment</option></datalist></div>
+  <div class="field"><label for="subcategory">Subcategory</label><input id="subcategory" name="subcategory" value="{{ tool.subcategory|default('') }}" placeholder="e.g. SDS rotary hammers"></div>
+  <div class="field"><label for="quantity">Quantity</label><input id="quantity" type="number" min="1" name="quantity" value="{{ tool.quantity|default(1) }}"></div>
+  <div class="field"><label for="condition">Condition</label><select id="condition" name="condition">{% for value in ['Unknown','New','Good','Fair','Poor'] %}<option {% if tool.condition|default('Unknown') == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select></div>
+  <div class="field full"><label for="specifications">Specifications <small>one per line</small></label><textarea id="specifications" name="specifications" rows="3">{% if tool.specifications is string %}{{ tool.specifications }}{% else %}{{ tool.specifications|default([])|join('\n') }}{% endif %}</textarea></div>
+  <div class="field"><label for="serial_number">Serial number</label><input id="serial_number" name="serial_number" value="{{ tool.serial_number|default('') }}"></div>
+  <div class="field full"><label for="notes">Notes</label><textarea id="notes" name="notes" rows="3">{{ tool.notes|default('') }}</textarea></div>
+  <div class="form-actions"><a class="button" href="{{ url_for('index') }}">Cancel</a><button class="button button-primary" type="submit">{% if mode == 'edit' %}Save changes{% else %}Save tool{% endif %}</button></div>
+</form>
+
+<script>
+  const input = document.getElementById('photo');
+  if (input) input.addEventListener('change', () => {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById('preview').src = URL.createObjectURL(file);
+    document.getElementById('file-name').textContent = file.name;
+    document.getElementById('preview-wrap').hidden = false;
+  });
+</script>
+{% endblock %}
+

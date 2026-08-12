@@ -1,0 +1,27 @@
+{
+  "tools": [
+    {
+      "name": "Titan 1500W SDS Plus Rotary Hammer (TTB653SDS)",
+      "category": "Power tools",
+      "subcategory": "SDS rotary hammers",
+      "manufacturer": "TITAN",
+      "model": "TTB653SDS",
+      "quantity": 1,
+      "condition": "Fair",
+      "specifications": [
+        "1500W",
+        "SDS Plus",
+        "Corded electric (power cable visible)",
+        "Magnesium (housing marked 'MAGNESIUM')",
+        "Includes molded plastic carry case and instruction manual"
+      ],
+      "serial_number": "",
+      "notes": "Rotary hammer pictured in its molded carry case. Instruction manual visible showing model TTB653SDS and barcode (Ref. No. 6846H). Tool shows dirt and scuffing; yellow controls/selector present. No serial number visible in photo.",
+      "confidence": 0.88,
+      "id": "a1861dcc919c4189b9eb84ca41b52398",
+      "created_at": "2026-08-12T13:19:03.024596+00:00",
+      "updated_at": "2026-08-12T13:19:03.024612+00:00",
+      "image_filename": "7a4390c7ea3341c4b4fed8d715007ff6.jpg"
+    }
+  ]
+}
