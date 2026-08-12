@@ -19,7 +19,7 @@ Run it:
 python app.py
 ```
 
-Open <http://localhost:5000>. To use it from a phone on the same trusted Wi-Fi, allow Python through the Windows firewall if prompted, find the computer's local IPv4 address with `ipconfig`, then open `http://YOUR-PC-IP:5000` on the phone. The photo input uses `capture="environment"`, which offers the rear camera on supporting mobile browsers.
+Open <http://localhost:3030>. To use it from a phone on the same trusted Wi-Fi, allow Python through the Windows firewall if prompted, find the computer's local IPv4 address with `ipconfig`, then open `http://YOUR-PC-IP:3030` on the phone. The photo input uses `capture="environment"`, which offers the rear camera on supporting mobile browsers.
 
 Tool records are in `data/tools.json`; uploaded photos are in `uploads/`. Back up both together. This JSON approach is suitable for a small personal catalogue; moving to SQLite is the natural next step for multi-user or larger use.
 
