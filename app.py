@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
-from flask import Flask, abort, flash, redirect, render_template, request, send_from_directory, url_for
+from flask import Flask, abort, flash, make_response, redirect, render_template, request, send_from_directory, url_for
 from werkzeug.utils import secure_filename
 
 from ai_analyser import analyse_image
@@ -121,6 +121,17 @@ def create_app(test_config: dict | None = None) -> Flask:
     @app.get("/uploads/<path:filename>")
     def uploaded_file(filename: str):
         return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
+    @app.get("/service-worker.js")
+    def service_worker():
+        response = make_response(send_from_directory(app.static_folder, "service-worker.js"))
+        response.headers["Cache-Control"] = "no-cache"
+        response.headers["Service-Worker-Allowed"] = "/"
+        return response
+
+    @app.get("/offline")
+    def offline():
+        return render_template("offline.html")
 
     @app.errorhandler(413)
     def too_large(_error):

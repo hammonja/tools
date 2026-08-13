@@ -1,0 +1,26 @@
+{
+  "name": "Toolbox Workshop Catalogue",
+  "short_name": "Toolbox",
+  "description": "Photograph, identify, and catalogue workshop tools.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f1e9",
+  "theme_color": "#17231d",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/static/icons/toolbox-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/toolbox-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

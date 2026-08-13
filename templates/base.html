@@ -4,7 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#17231d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Toolbox">
   <title>{% block title %}Toolbox{% endblock %}</title>
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
+  <link rel="icon" href="{{ url_for('static', filename='icons/toolbox.svg') }}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/toolbox-180.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -13,7 +19,10 @@
       <span class="brand-mark">T</span>
       <span><strong>Toolbox</strong><small>Workshop catalogue</small></span>
     </a>
-    <a class="button button-primary header-add" href="{{ url_for('new_tool') }}">+ Add tool</a>
+    <div class="header-actions">
+      <button class="button install-button" id="install-app" type="button" hidden>Install app</button>
+      <a class="button button-primary header-add" href="{{ url_for('new_tool') }}">+ Add tool</a>
+    </div>
   </header>
   <main class="page-shell">
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -25,6 +34,6 @@
     {% endwith %}
     {% block content %}{% endblock %}
   </main>
+  <script src="{{ url_for('static', filename='pwa.js') }}" defer></script>
 </body>
 </html>
-

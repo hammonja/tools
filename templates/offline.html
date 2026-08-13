@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Offline · Toolbox{% endblock %}
+{% block content %}
+<section class="empty-state">
+  <span class="empty-icon">T</span>
+  <h1>You’re offline</h1>
+  <p>Reconnect to the workshop computer’s Wi-Fi network, then try again.</p>
+  <a class="button button-primary" href="{{ url_for('index') }}">Try again</a>
+</section>
+{% endblock %}

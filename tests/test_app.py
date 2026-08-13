@@ -28,6 +28,20 @@ def test_empty_catalogue(client):
     assert b"Your catalogue is ready" in response.data
 
 
+def test_pwa_files_are_available(client):
+    manifest = client.get("/static/manifest.webmanifest")
+    assert manifest.status_code == 200
+    assert manifest.json["display"] == "standalone"
+    assert manifest.json["start_url"] == "/"
+
+    worker = client.get("/service-worker.js")
+    assert worker.status_code == 200
+    assert worker.headers["Service-Worker-Allowed"] == "/"
+    assert worker.headers["Cache-Control"] == "no-cache"
+
+    assert client.get("/offline").status_code == 200
+
+
 def test_add_edit_search_and_delete_manual_tool(client, app):
     response = client.post("/tools/new", data={
         "name": "SDS Plus rotary hammer", "manufacturer": "Titan", "model": "TTB653SDS",
