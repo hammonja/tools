@@ -183,3 +183,16 @@ def test_startup_model_override(monkeypatch):
     module.main(["--openai-model", "gpt-6-luna"])
     assert os.environ["OPENAI_MODEL"] == "gpt-6-luna"
     assert calls == [{"host": "0.0.0.0", "port": 3030, "debug": True}]
+
+
+def test_local_model_file_without_reading_credentials(tmp_path, monkeypatch):
+    import os
+    import app as module
+    monkeypatch.setenv("OPENAI_MODEL", "gpt-5-mini")
+    monkeypatch.setattr(module, "BASE_DIR", tmp_path)
+    monkeypatch.setattr(module.app, "run", lambda **kwargs: None)
+    (tmp_path / "openai-model.txt").write_text("gpt-6-luna\n", encoding="utf-8")
+    module.main([])
+    assert os.environ["OPENAI_MODEL"] == "gpt-6-luna"
+    module.main(["--openai-model", "explicit-model"])
+    assert os.environ["OPENAI_MODEL"] == "explicit-model"

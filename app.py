@@ -208,8 +208,12 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="Run the Toolbox catalogue")
     parser.add_argument("--openai-model", help="Override the photo analysis model for this service")
     args = parser.parse_args(argv)
-    if args.openai_model:
-        os.environ["OPENAI_MODEL"] = args.openai_model.strip()
+    model_file = BASE_DIR / "openai-model.txt"
+    selected_model = args.openai_model
+    if selected_model is None and model_file.is_file():
+        selected_model = model_file.read_text(encoding="utf-8-sig").strip()
+    if selected_model:
+        os.environ["OPENAI_MODEL"] = selected_model.strip()
     app.logger.warning("Photo analysis model: %s", os.getenv("OPENAI_MODEL", "").strip() or "gpt-6-luna")
     app.run(host="0.0.0.0", port=3030, debug=True)
 

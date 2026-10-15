@@ -17,7 +17,9 @@ Photo identification defaults to `gpt-6-luna` using the Responses API with struc
 
 After clicking **Analyse photograph**, the page shows upload progress followed by “Photo uploaded — identifying the tool…”. Duplicate submissions are blocked while it is working. Connection errors and timeouts keep the selected photo available for retry; an AI failure still offers the uploaded photo for manual entry.
 
-A service can select the model without editing its credentials file: `python app.py --openai-model gpt-6-luna`. In PiDash, use `app.py --openai-model gpt-6-luna` as the program, update the service definition, and restart it. This explicit startup option takes priority over `OPENAI_MODEL`; startup logs show the selected model without credentials.
+For a PiDash deployment whose system service is locked, upload a plain `openai-model.txt` file containing `gpt-6-luna` into the Tools project folder, then restart Tools. This local, Git-ignored setting takes priority over `.env`. It contains only a model name and no credentials.
+
+A service can select the model without editing its credentials file: `python app.py --openai-model gpt-6-luna`. In PiDash, use `app.py --openai-model gpt-6-luna` as the program, update the service definition, and restart it. This explicit startup option takes priority over `openai-model.txt` and `OPENAI_MODEL`; startup logs show the selected model without credentials.
 
 Run it:
 
