@@ -4,7 +4,8 @@
 <section class="empty-state">
   <span class="empty-icon">T</span>
   <h1>You’re offline</h1>
-  <p>Reconnect to the workshop computer’s Wi-Fi network, then try again.</p>
-  <a class="button button-primary" href="{{ url_for('index') }}">Try again</a>
+  <p>Adding, editing and analysing tools needs a connection. You can still browse your saved catalogue.</p>
+  <a class="button button-primary" href="{{ url_for('index') }}">Open catalogue</a>
+  <button class="button" type="button" onclick="location.reload()">Try again</button>
 </section>
 {% endblock %}

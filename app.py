@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import argparse
 import os
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
-from flask import Flask, abort, flash, make_response, redirect, render_template, request, send_from_directory, url_for
+from flask import Flask, abort, flash, jsonify, make_response, redirect, render_template, request, send_from_directory, url_for
 from werkzeug.utils import secure_filename
 
 from ai_analyser import analyse_image
@@ -31,6 +32,34 @@ def create_app(test_config: dict | None = None) -> Flask:
     Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
     store = ToolStore(app.config["DATA_FILE"])
     app.extensions["tool_store"] = store
+
+    @app.after_request
+    def fresh_pages(response):
+        if request.endpoint != "static":
+            response.headers["Cache-Control"] = "no-store"
+        if request.endpoint == "service_worker":
+            response.headers["Cache-Control"] = "no-cache"
+        return response
+
+    @app.get("/api/tools")
+    def catalogue():
+        tools = store.list()
+        for tool in tools:
+            tool["image_url"] = ""
+            filename = tool.get("image_filename", "")
+            if filename and Path(filename).name == filename:
+                path = Path(app.config["UPLOAD_FOLDER"]) / filename
+                try:
+                    stat = path.stat()
+                except FileNotFoundError:
+                    continue
+                tool["image_url"] = url_for("uploaded_file", filename=filename, v=f"{stat.st_mtime_ns}-{stat.st_size}")
+        return jsonify(schema_version=1, tools=tools)
+
+    @app.get("/catalogue-shell")
+    def catalogue_shell():
+        # A data-free page: never cache flash messages or an old filtered list.
+        return render_template("index.html", tools=[], categories=[], query="", selected_category="", shell=True)
 
     @app.get("/")
     def index():
@@ -175,5 +204,15 @@ def _now() -> str:
 app = create_app()
 
 
-if __name__ == "__main__":
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Run the Toolbox catalogue")
+    parser.add_argument("--openai-model", help="Override the photo analysis model for this service")
+    args = parser.parse_args(argv)
+    if args.openai_model:
+        os.environ["OPENAI_MODEL"] = args.openai_model.strip()
+    app.logger.warning("Photo analysis model: %s", os.getenv("OPENAI_MODEL", "").strip() or "gpt-6-luna")
     app.run(host="0.0.0.0", port=3030, debug=True)
+
+
+if __name__ == "__main__":
+    main()

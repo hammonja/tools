@@ -116,3 +116,70 @@ def test_photo_analysis_review_and_save(client, app, monkeypatch):
     saved = app.extensions["tool_store"].list()[0]
     assert saved["image_filename"] == filename
     assert saved["model"] == "TTB653SDS"
+
+
+def test_catalogue_sync_is_complete_versioned_and_uncached(client, app):
+    client.post("/tools/new", data={"name": "Hammer", "category": "Hand tools"})
+    client.post("/tools/new", data={"name": "Drill", "category": "Power tools"})
+    store = app.extensions["tool_store"]
+    first = store.list()[0]
+    photo = app.config["UPLOAD_FOLDER"] / "hammer.jpg"
+    photo.write_bytes(b"photo-v1")
+    store.update(first["id"], {"image_filename": photo.name})
+    response = client.get("/api/tools?q=drill&category=Power+tools")
+    assert response.headers["Cache-Control"] == "no-store"
+    assert len(response.json["tools"]) == 2
+    assert response.json["schema_version"] == 1
+    url = response.json["tools"][0]["image_url"]
+    assert url.startswith("/uploads/hammer.jpg?v=")
+    assert client.get(url).data == b"photo-v1"
+    photo.write_bytes(b"replacement-photo-v2")
+    assert client.get("/api/tools").json["tools"][0]["image_url"] != url
+    store.update(first["id"], {"name": "Updated hammer"})
+    assert client.get("/api/tools").json["tools"][0]["name"] == "Updated hammer"
+    client.post(f"/tools/{first['id']}/delete")
+    assert [tool["name"] for tool in client.get("/api/tools").json["tools"]] == ["Drill"]
+    client.post(f"/tools/{store.list()[0]['id']}/delete")
+    assert client.get("/api/tools").json["tools"] == []
+
+
+def test_missing_photo_and_corrupt_catalogue(client, app):
+    store = app.extensions["tool_store"]
+    store.add({"id": "one", "name": "Hammer", "image_filename": "missing.jpg"})
+    assert client.get("/api/tools").json["tools"][0]["image_url"] == ""
+    store.path.write_text("invalid json", encoding="utf-8")
+    # Never turn unreadable server data into an authoritative empty catalogue.
+    with pytest.raises(RuntimeError):
+        client.get("/api/tools")
+
+
+def test_offline_shell_contains_no_records_or_flash_messages(client):
+    client.post("/tools/new", data={"name": "Private tool", "category": "Hand tools"})
+    response = client.get("/catalogue-shell")
+    assert b"Private tool" not in response.data
+    assert b"Tool added to your catalogue" not in response.data
+    assert b"catalogue-results" in response.data
+    assert b"catalogue.js" in response.data
+    assert b"Tool added to your catalogue" in client.get("/").data
+
+
+def test_photo_analysis_failure_preserves_uploaded_photo(client, monkeypatch):
+    def fail(*_args):
+        raise RuntimeError("Analysis unavailable. Try again later.")
+    monkeypatch.setattr("app.analyse_image", fail)
+    response = client.post("/tools/analyse", data={"photo": (io.BytesIO(b"photo"), "tool.jpg")})
+    assert response.status_code == 503
+    assert b"Analysis unavailable" in response.data
+    assert b'/tools/save-analysis' in response.data
+    assert b'image_filename' in response.data
+
+
+def test_startup_model_override(monkeypatch):
+    import os
+    import app as module
+    calls = []
+    monkeypatch.setenv("OPENAI_MODEL", "gpt-5-mini")
+    monkeypatch.setattr(module.app, "run", lambda **kwargs: calls.append(kwargs))
+    module.main(["--openai-model", "gpt-6-luna"])
+    assert os.environ["OPENAI_MODEL"] == "gpt-6-luna"
+    assert calls == [{"host": "0.0.0.0", "port": 3030, "debug": True}]

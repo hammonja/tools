@@ -6,17 +6,19 @@
     <h1>Every tool.<br><em>Easy to find.</em></h1>
     <p>Photograph a tool and let AI prepare the catalogue entry, then check it before saving.</p>
   </div>
-  <div class="stat-card"><strong>{{ tools|sum(attribute='quantity') }}</strong><span>items shown</span></div>
+  <div class="stat-card"><strong id="item-count">{{ tools|sum(attribute='quantity') }}</strong><span>items shown</span></div>
 </section>
 
-<form class="filters" method="get">
+<div class="sync-bar"><p id="sync-status" role="status">Checking for catalogue updates…</p><button class="button" id="sync-now" type="button" hidden>Sync now</button></div>
+<noscript><p>Enable JavaScript to save and search your catalogue offline.</p></noscript>
+<form class="filters" id="catalogue-filters" method="get">
   <label class="search-field">
     <span class="sr-only">Search tools</span>
     <input type="search" name="q" value="{{ query }}" placeholder="Search tool, maker or model…">
   </label>
   <label>
     <span class="sr-only">Category</span>
-    <select name="category" onchange="this.form.submit()">
+    <select name="category">
       <option value="">All categories</option>
       {% for category in categories %}<option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>{% endfor %}
     </select>
@@ -24,6 +26,7 @@
   <button class="button" type="submit">Search</button>
 </form>
 
+<div id="catalogue-results" data-shell="{{ 'true' if shell else 'false' }}">
 {% if tools %}
 <div class="tool-grid">
   {% for tool in tools %}
@@ -63,5 +66,6 @@
   <a class="button button-primary" href="{{ url_for('new_tool') }}">Photograph a tool</a>
 </section>
 {% endif %}
+</div>
 {% endblock %}
 

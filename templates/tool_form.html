@@ -21,6 +21,9 @@
     </label>
     <div id="preview-wrap" class="preview-wrap" hidden><img id="preview" alt="Selected tool"><span id="file-name"></span></div>
     <button class="button button-primary button-wide" type="submit">Analyse photograph</button>
+    <div id="analysis-progress" class="analysis-progress" role="status" aria-live="polite" hidden>
+      <span class="spinner" aria-hidden="true"></span><span id="analysis-status"></span>
+    </div>
   </form>
 </section>
 <div class="divider"><span>or add manually</span></div>
@@ -46,15 +49,5 @@
   <div class="form-actions"><a class="button" href="{{ url_for('index') }}">Cancel</a><button class="button button-primary" type="submit">{% if mode == 'edit' %}Save changes{% else %}Save tool{% endif %}</button></div>
 </form>
 
-<script>
-  const input = document.getElementById('photo');
-  if (input) input.addEventListener('change', () => {
-    const file = input.files[0];
-    if (!file) return;
-    document.getElementById('preview').src = URL.createObjectURL(file);
-    document.getElementById('file-name').textContent = file.name;
-    document.getElementById('preview-wrap').hidden = false;
-  });
-</script>
 {% endblock %}
 

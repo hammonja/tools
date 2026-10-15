@@ -44,7 +44,7 @@ def analyse_image(path: str | Path, mime_type: str) -> ToolAnalysis:
     data_url = f"data:{mime_type};base64,{base64.b64encode(image_bytes).decode('ascii')}"
     client = OpenAI(api_key=api_key)
     response = client.responses.parse(
-        model=os.getenv("OPENAI_MODEL", "gpt-5-mini"),
+        model=os.getenv("OPENAI_MODEL", "").strip() or "gpt-6-luna",
         input=[
             {"role": "system", "content": PROMPT},
             {
